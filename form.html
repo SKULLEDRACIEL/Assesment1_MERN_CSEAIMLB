@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Currency Converter App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2b073;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background-color:#db9452;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+    h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        .btn {
+            background-color:#f98500;
+            color: #ffffff;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+        }
+        .btn:hover {
+            background-color: #f98500;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginPage" class="container">
+        <h2>Login</h2>
+        <div class="form-group">
+            <input type="text" id="username" placeholder="Username">
+        </div>
+        <div class="form-group">
+            <input type="password" id="password" placeholder="Password">
+        </div>
+        <button class="btn" onclick="validateLogin()">Login</button>
+        <div id="loginErrorMessage" class="error-message"></div>
+    </div>
+    <div id="converterPage" class="container" style="display: none;">
+        <h2>Currency Converter</h2>
+        <div class="form-group">
+            <input type="number" id="amount" placeholder="Enter amount">
+        </div>
+        <div class="form-group">
+            <select id="fromCurrency">
+                <option value="USD">USD - American Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="INR">INR - Indian Rupee</option>             
+            </select>
+        </div>
+        <div class="form-group">
+            <select id="toCurrency">
+                <option value="INR">INR - Indian Rupee</option>
+                <option value="USD">USD - American Dollar</option>
+                <option value="EUR">EUR - Euro</option>               
+            </select>
+        </div>
+        <button class="btn" onclick="convertCurrency()">Convert</button>
+        <div class="form-group">
+            <input type="text" id="convertedAmount" placeholder="Converted amount" readonly>
+        </div>
+        <div id="errorMessage" class="error-message"></div>
+    </div>
+    <script>function validateLogin() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginErrorMessage = document.getElementById('loginErrorMessage');
+            if (username === 'admin' && password === 'admin') {
+                loginErrorMessage.textContent = '';
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('converterPage').style.display = 'block';
+            } else {
+                loginErrorMessage.textContent = 'Login failed! Incorrect username or password.';
+            }
+        }
+        async function convertCurrency() {
+            const amount = document.getElementById('amount').value;
+            const fromCurrency = document.getElementById('fromCurrency').value;
+            const toCurrency = document.getElementById('toCurrency').value;
+            const convertedAmountField = document.getElementById('convertedAmount');
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = '';      
+            if (!amount || amount <= 0) {
+                errorMessage.textContent = 'Please enter a valid amount';
+                return;
+            }
+            try { 
+                const response = await fetch(`https://api.exchangerate-api.com/v4/latest/${fromCurrency}`);             
+                if (!response.ok) {
+                    throw new Error('Failed to fetch exchange rates. Please try again later.');
+                }
+                const data = await response.json();
+                const rate = data.rates[toCurrency];
+                const convertedAmount = (amount * rate).toFixed(2);
+                convertedAmountField.value = `${convertedAmount} ${toCurrency}`;
+            } catch (error) {
+                errorMessage.textContent = error.message;
+            }
+        }
+    </script>
+</body>
+</html>
